@@ -99,3 +99,9 @@ On iOS, you can use popthings via:
 In both cases, Pythonista will prompt you for the placeholder values if there
 are any.
 
+
+## Known limitations
+
+- The TaskPaper file must start with a project.
+- If a header has a comment, the previous task or project is going to end up
+  with that comment.
