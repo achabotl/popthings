@@ -25,7 +25,7 @@ a new shortcut in the Pythonista settings. See the [Pythonista
 Documentation](http://omz-software.com/pythonista/docs/ios/pythonista.html')
 for more details.
 
-![Pythonista Edit Shortcut](img/pythonista-edit-shortcut.jpeg)
+![Pythonista Edit Shortcut](img/pythonista-edit-shortcut.png)
 
 To add a button on the Today Widget, use the following entry for the
 `SHORTCUT` variable in the `Examples/Widget/Launcher.py` file:
