@@ -46,8 +46,8 @@ Date parsing is done by Things itself, so anything Things supports is also
 supported here.
 
 - The indentation _must_ be done with Tabs, which is the normal TaskPaper behavior.
-- Placeholders are assumed to be on the second line of file, to use a `$`
-  prefix, and be space-separated.
+- Placeholders must be defined on the second line of the file. They must have
+  a `$` prefix and be space-separated.
 - The `@start` and `@due` tags expect a value and will be used for the "when"
   and "deadline" attributes of a project or task. All other tags are passed
   through and their values are ignored.
@@ -56,7 +56,7 @@ supported here.
   TaskPaper format.
 - A task under a task is a checklist item.
 
-Here a packing list demonstration:
+Here is a packing list template with 3 placeholders:
 
 ```taskpaper
 Prepare luggage for trip to $destination: @start($start)
@@ -94,7 +94,7 @@ On iOS, you can use popthings via:
 - **The Share Sheet** to share the content of a TaskPaper document from any
   application.
 - **From Pythonista or from the Today Widget** where you'll be prompted to
-  pick a file using the File picker. 
+  pick a file using the File picker.
 
 In both cases, Pythonista will prompt you for the placeholder values if there
 are any.
