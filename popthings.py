@@ -74,7 +74,7 @@ SPECIAL_TAGS_MAPPING = {
 # Default placeholder symbol
 PLACEHOLDER_SYMBOL = '$'
 
-PATTERN_PROJECT = re.compile(r'^(?P<indent>\t*)(\s*)(?P<text>[^-\s].*):$')
+PATTERN_PROJECT = re.compile(r'^(?P<indent>\t*)(\s*)(?P<text>(?<!-\s).*):$')
 PATTERN_TASK = re.compile(r'^(?P<indent>\t*)(-\s(?P<text>.*))$')
 PATTERN_NOTE = re.compile(r'(?P<indent>\t*)(?P<text>[^\t]*.*)$')
 PATTERN_TAG = re.compile(r"""(?:^|\s+)@             # space and @ before tag
@@ -141,18 +141,17 @@ class TPNode(object):
         text_without_tags, tags_text = cls.split_text_and_tags(line)
         tags = cls.find_tags(tags_text)
 
-        match = PATTERN_PROJECT.match(text_without_tags)
+        match = PATTERN_TASK.match(text_without_tags)
         if match:
-            type = 'project'
+            type = 'task'
         else:
-            match = PATTERN_TASK.match(text_without_tags)
+            match = PATTERN_PROJECT.match(text_without_tags)
             if match:
-                type = 'task'
+                type = 'project'
             else:
                 match = PATTERN_NOTE.match(text_without_tags)
                 if match:
-                    if match.group('text'):
-                        type = 'note'
+                    type = 'note'
                 else:
                     type = 'empty'
         indent = len(match.group('indent'))
