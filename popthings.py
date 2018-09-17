@@ -6,9 +6,9 @@ items. Date parsing is done by Things itself, so anything Things
 supports is also supported here.
 
 - The indentation _must_ be done with Tabs.
-- Placeholders are on the second line of file, use a '$' prefix, 
+- Placeholders are on the second line of file, use a '$' prefix,
   and are space-separated.
-- The @start and @due tags expect a value and will be used for the 
+- The @start and @due tags expect a value and will be used for the
   "when" and "deadline" attributes of a project of task. All other
   tags are passed through and their values are ignored.
 - A project under a project is a considered a heading. It can't have
@@ -16,7 +16,7 @@ supports is also supported here.
   than the TaskPaper format.
 - A task under a task is a checklist item.
 
-Here's an example TaskPaper file containing two projects demonstrating 
+Here's an example TaskPaper file containing two projects demonstrating
 what's possible. They would be added to Things as two separate projects.
 
     Project 1:
@@ -29,7 +29,7 @@ what's possible. They would be added to Things as two separate projects.
                 - Also a checklist item under task 2
         Heading 1:
             - Task under heading 1
-            
+
     Project 2:
         - Task under project 2
         Heading 2, under project 2:
@@ -67,7 +67,7 @@ log = logging.getLogger(__name__)
 # Mapping between tag names in TaskPaper, and names in the Things
 # JSON API. The format is {taskpaper_name: things_name}
 SPECIAL_TAGS_MAPPING = {
-    'due': 'deadline', 
+    'due': 'deadline',
     'start': 'when',
 }
 
@@ -254,7 +254,7 @@ class TPNode(object):
                 return False
             parent = parent.parent
         return True
-        
+
     @staticmethod
     def find_tags(text):
         """
@@ -281,7 +281,7 @@ class TPNode(object):
 class ThingsObject(object):
     #: Things item type
     type = None
-    
+
     def __init__(self, title):
         """
         Abstract base class for all Things objects, and factory to create
@@ -820,7 +820,7 @@ def build_things_url(things_json):
     json_str = json.dumps(things_json, separators=(',', ':'))
     url = 'things:///json?data={}'.format(quote(json_str))
     return url
-    
+
 
 def get_document(platform):
     """
@@ -846,7 +846,7 @@ def get_document(platform):
         # from pop ups.
         import appex
         import dialogs
-        
+
         if appex.is_running_extension():
             template = appex.get_text()
         else:
@@ -863,7 +863,7 @@ def get_document(platform):
             description=__doc__,
             formatter_class=argparse.RawTextHelpFormatter,
         )
-        parser.add_argument('infile', 
+        parser.add_argument('infile',
                             help='path to taskpaper template')
         args = parser.parse_args()
         with open(args.infile, encoding='utf-8') as f:
