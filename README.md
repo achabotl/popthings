@@ -99,7 +99,7 @@ On iOS, you can use popthings via:
 In both cases, Pythonista will prompt you for the placeholder values if there
 are any.
 
-
+![](img/ipad-run-from-pythonista.gif)
 ## Known limitations
 
 - The TaskPaper file must start with a project.
