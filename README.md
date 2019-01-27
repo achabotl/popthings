@@ -100,8 +100,21 @@ In both cases, Pythonista will prompt you for the placeholder values if there
 are any.
 
 ![](img/ipad-run-from-pythonista.gif)
+
+
 ## Known limitations
 
 - The TaskPaper file must start with a project.
 - If a header has a comment, the previous task or project is going to end up
   with that comment.
+
+
+## Making a Release
+
+1. Bump the version in `popthings.py`
+2. Update the changelog, link the versions.
+3. Commit and tag with version number. Push tags. Update the release on GitHub.
+4. Build a source dist with `python3 setup.py clean && rm dist/* && python3 setup.py sdist bdist_wheel`
+5. Test upload to PyPI test with `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`
+6. Create a temporary environment `mktmpenv` and test install with `pip install --index-url https://test.pypi.org/simple/ popthings`
+7. If everything looks good, upload for real with `twine upload dist/*`
