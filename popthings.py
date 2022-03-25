@@ -24,7 +24,7 @@ what's possible. They would be added to Things as two separate projects.
         Note under project 1
         - Task 1 @due($start + 1w) @$where
             A note under task 1
-        - Task 2 @start($start)
+        - Task 2 @start($start - 1)
             - Checklist item under task 2
                 - Also a checklist item under task 2
         Heading 1:
@@ -40,9 +40,11 @@ Attributes
 ----------
 
 """
+from datetime import datetime, timedelta
 from io import open
 import json
 import logging
+import operator
 import re
 import sys
 try:
@@ -86,6 +88,65 @@ PATTERN_TAG = re.compile(r"""(?:^|\s+)@             # space and @ before tag
                              (?=\s|$)               # lookahead, match if
                                                     # space or EOL
                              """, re.VERBOSE)
+
+# Patterns to match dates and dates with day offsets
+ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+DATE_OFFSET_RE = re.compile(r"""
+    (?P<base_date>\d{4}-\d{2}-\d{2})
+    \s*
+    (?P<op>[+-])
+    \s*
+    (?P<offset_count>\d+)
+    """, re.X)
+
+
+def compute_date(date_str):
+    """
+    Compute new date string given dates with day offsets.
+
+    Parameters
+    ==========
+    date_str : string
+        Text string representing a date. The format must be a standalone date:
+        'YYYY-MM-DD', a date with a day offset: 'YYYY-MM-DD + 1' or 'YYYY-MM-DD
+        - 10'. Other values as just passed through, assuming Things knows how
+        to handled them,  like 'today', 'tomorrow', 'evening', 'next month',
+        etc.
+
+    Returns
+    =======
+    new_date_str : string
+        Date where the offset has been added or subtracted from the date.
+
+    """
+    date_str = date_str.strip()
+
+    # Simple ISO date
+    if ISO_DATE_RE.match(date_str):
+        return date_str
+
+    elif DATE_OFFSET_RE.match(date_str):
+        # Precompute dates with offsets of days
+        m = DATE_OFFSET_RE.match(date_str)
+        if m is None:
+            raise ValueError(f"Unable to parse date '{date_str}' as 'YYYY-MM-DD+/-offset' date.")
+
+        try:
+            op = {
+                '-': operator.sub,
+                '+': operator.add,
+            }.get(m.group('op'))
+        except KeyError:
+            raise ValueError(f"Unable to parse date {date_str} as YYYY-MM-DD +/- D date. The operator is wrong.")
+
+        count = int(m.group('offset_count'))
+        date_delta = timedelta(count)
+
+        date = datetime.strptime(m.group("base_date"), '%Y-%m-%d')
+
+        return op(date, date_delta).strftime('%Y-%m-%d')
+
+    return date_str
 
 
 class TPNode(object):
@@ -442,8 +503,8 @@ class _ThingsRichObject(ThingsObject):
         """
         super(_ThingsRichObject, self).__init__(title)
         self.notes = notes
-        self.when = when
-        self.deadline = deadline
+        self.when = compute_date(when) if when else when
+        self.deadline = compute_date(deadline) if deadline else deadline
         if tags is None:
             tags = []
         self.tags = tags
