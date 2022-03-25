@@ -3,24 +3,26 @@ import popthings
 from setuptools import setup
 
 
-with io.open("README.md", "r", encoding='utf-8') as f:
+with io.open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 
 setup(
-    name='popthings',
+    name="popthings",
     version=popthings.__version__,
-    author='Alexandre Chabot-Leclerc',
-    author_email='github@alexchabot.net',
-    description=('iOS and command line tool to import a TaskPaper template'
-                 ' with placeholders into Things by Cultured Code'),
+    author="Alexandre Chabot-Leclerc",
+    author_email="github@alexchabot.net",
+    description=(
+        "iOS and command line tool to import a TaskPaper template"
+        " with placeholders into Things by Cultured Code"
+    ),
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/achabotl/popthings",
-    scripts=['popthings.py'],
+    scripts=["popthings.py"],
     entry_points={
-        'console_scripts': [
-            'popthings = popthings:cli',
+        "console_scripts": [
+            "popthings = popthings:cli",
         ],
     },
     classifiers=(
