@@ -4,7 +4,7 @@ from popthings import compute_date
 
 class TestDateParsing(TestCase):
     def test_iso_date(self):
-        """ ISO formatted dates: YYYY-MM-DD."""
+        """ISO formatted dates: YYYY-MM-DD."""
         date = "2018-12-31"
         self.assertEqual(date, compute_date(date))
 
@@ -28,6 +28,13 @@ class TestDateParsing(TestCase):
         self.assertEqual("2018-12-20", compute_date(date))
 
     def test_other_values(self):
-        for word in ('today', 'tomorrow', 'evening', 'anytime', 'someday', 'next month'):
+        for word in (
+            "today",
+            "tomorrow",
+            "evening",
+            "anytime",
+            "someday",
+            "next month",
+        ):
             with self.subTest(word=word):
                 self.assertEqual(word, compute_date(word))

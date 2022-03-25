@@ -47,6 +47,7 @@ import logging
 import operator
 import re
 import sys
+
 try:
     # Python 3
     from urllib.parse import quote
@@ -54,6 +55,7 @@ except ImportError:
     # Python 2
     from urllib import quote
 import webbrowser
+
 try:
     # Shadow Python 2 input, which is eval(raw_input(prompt))
     input = raw_input
@@ -69,17 +71,18 @@ log = logging.getLogger(__name__)
 # Mapping between tag names in TaskPaper, and names in the Things
 # JSON API. The format is {taskpaper_name: things_name}
 SPECIAL_TAGS_MAPPING = {
-    'due': 'deadline',
-    'start': 'when',
+    "due": "deadline",
+    "start": "when",
 }
 
 # Default placeholder symbol
-PLACEHOLDER_SYMBOL = '$'
+PLACEHOLDER_SYMBOL = "$"
 
-PATTERN_PROJECT = re.compile(r'^(?P<indent>\t*)(\s*)(?P<text>(?<!-\s).*):$')
-PATTERN_TASK = re.compile(r'^(?P<indent>\t*)(-\s(?P<text>.*))$')
-PATTERN_NOTE = re.compile(r'(?P<indent>\t*)(?P<text>[^\t]*.*)$')
-PATTERN_TAG = re.compile(r"""(?:^|\s+)@             # space and @ before tag
+PATTERN_PROJECT = re.compile(r"^(?P<indent>\t*)(\s*)(?P<text>(?<!-\s).*):$")
+PATTERN_TASK = re.compile(r"^(?P<indent>\t*)(-\s(?P<text>.*))$")
+PATTERN_NOTE = re.compile(r"(?P<indent>\t*)(?P<text>[^\t]*.*)$")
+PATTERN_TAG = re.compile(
+    r"""(?:^|\s+)@             # space and @ before tag
                              (?P<name>\w+)          # the tag name
                              (?:\(                  # don't capture the ()
                                  (?P<value>[^\)]*)  # the tag value, if any
@@ -87,17 +90,22 @@ PATTERN_TAG = re.compile(r"""(?:^|\s+)@             # space and @ before tag
                                  )?                 # the value is optional
                              (?=\s|$)               # lookahead, match if
                                                     # space or EOL
-                             """, re.VERBOSE)
+                             """,
+    re.VERBOSE,
+)
 
 # Patterns to match dates and dates with day offsets
 ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-DATE_OFFSET_RE = re.compile(r"""
+DATE_OFFSET_RE = re.compile(
+    r"""
     (?P<base_date>\d{4}-\d{2}-\d{2})
     \s*
     (?P<op>[+-])
     \s*
     (?P<offset_count>\d+)
-    """, re.X)
+    """,
+    re.X,
+)
 
 
 def compute_date(date_str):
@@ -129,22 +137,26 @@ def compute_date(date_str):
         # Precompute dates with offsets of days
         m = DATE_OFFSET_RE.match(date_str)
         if m is None:
-            raise ValueError(f"Unable to parse date '{date_str}' as 'YYYY-MM-DD+/-offset' date.")
+            raise ValueError(
+                f"Unable to parse date '{date_str}' as 'YYYY-MM-DD+/-offset' date."
+            )
 
         try:
             op = {
-                '-': operator.sub,
-                '+': operator.add,
-            }.get(m.group('op'))
+                "-": operator.sub,
+                "+": operator.add,
+            }.get(m.group("op"))
         except KeyError:
-            raise ValueError(f"Unable to parse date {date_str} as YYYY-MM-DD +/- D date. The operator is wrong.")
+            raise ValueError(
+                f"Unable to parse date {date_str} as YYYY-MM-DD +/- D date. The operator is wrong."
+            )
 
-        count = int(m.group('offset_count'))
+        count = int(m.group("offset_count"))
         date_delta = timedelta(count)
 
-        date = datetime.strptime(m.group("base_date"), '%Y-%m-%d')
+        date = datetime.strptime(m.group("base_date"), "%Y-%m-%d")
 
-        return op(date, date_delta).strftime('%Y-%m-%d')
+        return op(date, date_delta).strftime("%Y-%m-%d")
 
     return date_str
 
@@ -178,9 +190,10 @@ class TPNode(object):
         self.children = []
 
     def __repr__(self):
-        return ('TPNode({self.text!r}, type={self.type!r},'
-                'tags={self.tags}, indent={self.indent})').format(
-            self=self)
+        return (
+            "TPNode({self.text!r}, type={self.type!r},"
+            "tags={self.tags}, indent={self.indent})"
+        ).format(self=self)
 
     @classmethod
     def from_line(cls, line, line_number=None):
@@ -204,19 +217,19 @@ class TPNode(object):
 
         match = PATTERN_TASK.match(text_without_tags)
         if match:
-            type = 'task'
+            type = "task"
         else:
             match = PATTERN_PROJECT.match(text_without_tags)
             if match:
-                type = 'project'
+                type = "project"
             else:
                 match = PATTERN_NOTE.match(text_without_tags)
                 if match:
-                    type = 'note'
+                    type = "note"
                 else:
-                    type = 'empty'
-        indent = len(match.group('indent'))
-        text = match.group('text')
+                    type = "empty"
+        indent = len(match.group("indent"))
+        text = match.group("text")
         return TPNode(line, text, indent, type, line_number, tags=tags)
 
     @classmethod
@@ -237,7 +250,7 @@ class TPNode(object):
             Text containing tags.
 
         """
-        text_without_tags, sep, tags_text = line.partition(' @')
+        text_without_tags, sep, tags_text = line.partition(" @")
         if sep:
             text_without_tags = text_without_tags.rstrip()
         return text_without_tags, sep + tags_text
@@ -257,24 +270,24 @@ class TPNode(object):
         self.children.append(node)
 
     def is_project(self):
-        """ True is the node is of type 'project'. """
-        return self.type == 'project'
+        """True is the node is of type 'project'."""
+        return self.type == "project"
 
     def is_task(self):
-        """ True is the node is of type 'task'. """
-        return self.type == 'task'
+        """True is the node is of type 'task'."""
+        return self.type == "task"
 
     def is_note(self):
-        """ True is the node is of type 'note'. """
-        return self.type == 'note'
+        """True is the node is of type 'note'."""
+        return self.type == "note"
 
     def is_empty(self):
-        """ True is the node is of type 'empty'. """
-        return self.type == 'empty'
+        """True is the node is of type 'empty'."""
+        return self.type == "empty"
 
     def is_root(self):
-        """ True if the node is the root of the TaskPaper tree. """
-        return self.type == 'root'
+        """True if the node is the root of the TaskPaper tree."""
+        return self.type == "root"
 
     def flatten(self):
         """
@@ -287,7 +300,7 @@ class TPNode(object):
         nodes : list of TPNodes
 
         """
-        flattened = [self] if self.type != 'root' else []
+        flattened = [self] if self.type != "root" else []
         for child in self.children:
             flattened.extend(child.flatten())
         return flattened
@@ -334,7 +347,7 @@ class TPNode(object):
         """
         tags = []
         for tag in PATTERN_TAG.finditer(text):
-            tags.append((tag.group('name'), tag.group('value')))
+            tags.append((tag.group("name"), tag.group("value")))
         return tags
 
 
@@ -367,13 +380,12 @@ class ThingsObject(object):
         self._attrs_mapping = {}
 
     def __repr__(self):
-        args = ', '.join('{k}={v!r}'.format(k=k, v=v)
-                         for k, v
-                         in self.__dict__.items()
-                         if not k.startswith('_')
-                         )
-        return "{self.__class__.__name__}({args})".format(
-            self=self, args=args)
+        args = ", ".join(
+            "{k}={v!r}".format(k=k, v=v)
+            for k, v in self.__dict__.items()
+            if not k.startswith("_")
+        )
+        return "{self.__class__.__name__}({args})".format(self=self, args=args)
 
     @classmethod
     def from_tp_node(self, node):
@@ -437,27 +449,27 @@ class ThingsObject(object):
 
     @staticmethod
     def is_heading(tp_node):
-        """ True if the TPNode is a Things heading. """
+        """True if the TPNode is a Things heading."""
         return tp_node.is_project() and tp_node.has_project_parent()
 
     @staticmethod
     def is_project(tp_node):
-        """ True if the TPNode is a Things project. """
+        """True if the TPNode is a Things project."""
         return tp_node.is_project() and not tp_node.has_project_parent()
 
     @staticmethod
     def is_checklist_item(tp_node):
-        """ True if the TPNode a Things checklist item. """
+        """True if the TPNode a Things checklist item."""
         return tp_node.is_task() and tp_node.parent.is_task()
 
     @staticmethod
     def is_todo(tp_node):
-        """ True if the TPNode is a Things to-do item. """
+        """True if the TPNode is a Things to-do item."""
         return tp_node.is_task() and not tp_node.parent.is_task()
 
     @staticmethod
     def is_note(tp_node):
-        """ True if the TPNode is a Things note. """
+        """True if the TPNode is a Things note."""
         return tp_node.is_note() or tp_node.is_empty()
 
     def to_json(self):
@@ -471,21 +483,20 @@ class ThingsObject(object):
 
         """
         d = {
-            'type': self.type,
-            'attributes': {
-                'title': self.title,
-            }
+            "type": self.type,
+            "attributes": {
+                "title": self.title,
+            },
         }
         for obj_attr, things_attr in self._attrs_mapping.items():
             value = getattr(self, obj_attr)
             if value:
-                d['attributes'][things_attr] = value
+                d["attributes"][things_attr] = value
         return d
 
 
 class _ThingsRichObject(ThingsObject):
-
-    def __init__(self, title, notes='', when=None, deadline=None, tags=None):
+    def __init__(self, title, notes="", when=None, deadline=None, tags=None):
         """
         Private Things object that has nodes, when date, deadline, and tags.
 
@@ -510,10 +521,10 @@ class _ThingsRichObject(ThingsObject):
         self.tags = tags
         # Mapping between Python attribute names and JSON keys.
         attrs_mapping = {
-            'notes': 'notes',
-            'when': 'when',
-            'deadline': 'deadline',
-            'tags': 'tags',
+            "notes": "notes",
+            "when": "when",
+            "deadline": "deadline",
+            "tags": "tags",
         }
         self._attrs_mapping.update(attrs_mapping)
 
@@ -528,22 +539,18 @@ class _ThingsRichObject(ThingsObject):
 
         """
         if self.notes:
-            note_text = '\n{node.title}'.format(node=node)
+            note_text = "\n{node.title}".format(node=node)
         else:
             note_text = node.title
         self.notes += note_text
 
 
 class ThingsToDo(_ThingsRichObject):
-    type = 'to-do'
+    type = "to-do"
 
-    def __init__(self,
-                 title,
-                 notes='',
-                 when=None,
-                 deadline=None,
-                 tags=None,
-                 checklist_items=None):
+    def __init__(
+        self, title, notes="", when=None, deadline=None, tags=None, checklist_items=None
+    ):
         """
         Represent a to-do item in Things.
 
@@ -567,7 +574,8 @@ class ThingsToDo(_ThingsRichObject):
 
         """
         super(ThingsToDo, self).__init__(
-            title, notes=notes, when=when, deadline=deadline, tags=tags)
+            title, notes=notes, when=when, deadline=deadline, tags=tags
+        )
         if checklist_items is None:
             checklist_items = []
         self.checklist_items = checklist_items
@@ -594,23 +602,25 @@ class ThingsToDo(_ThingsRichObject):
 
         """
         d = super(ThingsToDo, self).to_json()
-        d['attributes']['checklist-items'] = [
+        d["attributes"]["checklist-items"] = [
             item.to_json() for item in self.checklist_items
         ]
         return d
 
 
 class ThingsProject(_ThingsRichObject):
-    type = 'project'
+    type = "project"
 
-    def __init__(self,
-                 title,
-                 notes='',
-                 when=None,
-                 deadline=None,
-                 tags=None,
-                 items=None,
-                 area=None):
+    def __init__(
+        self,
+        title,
+        notes="",
+        when=None,
+        deadline=None,
+        tags=None,
+        items=None,
+        area=None,
+    ):
         """
         Things project item.
 
@@ -633,12 +643,13 @@ class ThingsProject(_ThingsRichObject):
             Name of the area under which to create the project.
         """
         super(ThingsProject, self).__init__(
-            title, notes=notes, when=when, deadline=deadline, tags=tags)
+            title, notes=notes, when=when, deadline=deadline, tags=tags
+        )
         if items is None:
             items = []
         self.items = items
         self.area = area
-        self._attrs_mapping['area'] = 'area'
+        self._attrs_mapping["area"] = "area"
 
     def add_item(self, item):
         """
@@ -662,9 +673,7 @@ class ThingsProject(_ThingsRichObject):
 
         """
         d = super(ThingsProject, self).to_json()
-        d['attributes']['items'] = [
-            item.to_json() for item in self.items
-        ]
+        d["attributes"]["items"] = [item.to_json() for item in self.items]
         return d
 
 
@@ -679,7 +688,7 @@ class ThingsHeading(ThingsObject):
 
     """
 
-    type = 'heading'
+    type = "heading"
 
 
 class ThingsChecklistItem(ThingsObject):
@@ -693,7 +702,7 @@ class ThingsChecklistItem(ThingsObject):
 
     """
 
-    type = 'checklist-item'
+    type = "checklist-item"
 
 
 class ThingsNote(ThingsObject):
@@ -706,7 +715,8 @@ class ThingsNote(ThingsObject):
         Note text.
 
     """
-    type = 'note'
+
+    type = "note"
 
 
 def find_and_replace_placeholders(text, symbol=PLACEHOLDER_SYMBOL):
@@ -744,15 +754,14 @@ def find_and_replace_placeholders(text, symbol=PLACEHOLDER_SYMBOL):
         # Text without placeholders
         return text
 
-    new_text = '\n'.join(lines[:1] + lines[2:])
-    placeholders = [name.strip()
-                    for name in placeholder_line.split(symbol)
-                    if name]
+    new_text = "\n".join(lines[:1] + lines[2:])
+    placeholders = [name.strip() for name in placeholder_line.split(symbol) if name]
     for name in placeholders:
         name_prompt = name.capitalize()
-        value = input('{} value? '.format(name_prompt))
+        value = input("{} value? ".format(name_prompt))
         new_text = new_text.replace(
-            '{symbol}{name}'.format(symbol=symbol, name=name), value)
+            "{symbol}{name}".format(symbol=symbol, name=name), value
+        )
     return new_text
 
 
@@ -811,30 +820,38 @@ def build_taskpaper_document_tree(text):
         for line_number, line in enumerate(text.splitlines())
     ]
 
-    root = TPNode('', '', -1, type='root')
+    root = TPNode("", "", -1, type="root")
     previous_node = root
     for node in nodes:
         if node.indent == previous_node.indent:
-            log.debug('Adding {node} to {previous_node.parent}'.format(
-                node=node, previous_node=previous_node
-            ))
+            log.debug(
+                "Adding {node} to {previous_node.parent}".format(
+                    node=node, previous_node=previous_node
+                )
+            )
             previous_node.parent.add_child(node)
         if node.indent > previous_node.indent:
-            log.debug('Adding {node} to {previous_node}'.format(
-                node=node, previous_node=previous_node
-            ))
+            log.debug(
+                "Adding {node} to {previous_node}".format(
+                    node=node, previous_node=previous_node
+                )
+            )
             previous_node.add_child(node)
         if node.indent < previous_node.indent:
-            log.debug('{node} is aunt of {previous_node}'.format(
-                node=node, previous_node=previous_node
-            ))
+            log.debug(
+                "{node} is aunt of {previous_node}".format(
+                    node=node, previous_node=previous_node
+                )
+            )
             # Find the parent whose indent difference is 1 and add sister
             previous_parent = previous_node
             while node.indent <= previous_parent.indent:
                 previous_parent = previous_parent.parent
-            log.debug('Adding {node} to {previous_parent}'.format(
-                node=node, previous_parent=previous_parent
-            ))
+            log.debug(
+                "Adding {node} to {previous_parent}".format(
+                    node=node, previous_parent=previous_parent
+                )
+            )
             previous_parent.add_child(node)
         previous_node = node
     return root
@@ -877,8 +894,8 @@ def build_things_url(things_json):
     https://support.culturedcode.com/customer/en/portal/articles/2803573
 
     """
-    json_str = json.dumps(things_json, separators=(',', ':'))
-    url = 'things:///json?data={}'.format(quote(json_str))
+    json_str = json.dumps(things_json, separators=(",", ":"))
+    url = "things:///json?data={}".format(quote(json_str))
     return url
 
 
@@ -901,7 +918,7 @@ def get_document(platform):
     text : str
 
     """
-    if platform == 'ios':
+    if platform == "ios":
         # If it's on iOS, get the text from the extension and get dates
         # from pop ups.
         import appex
@@ -915,18 +932,18 @@ def get_document(platform):
             if infile is None:
                 # User cancelled
                 sys.exit()
-            with open(infile, encoding='utf-8') as f:
+            with open(infile, encoding="utf-8") as f:
                 template = f.read()
     else:
         import argparse
+
         parser = argparse.ArgumentParser(
             description=__doc__,
             formatter_class=argparse.RawTextHelpFormatter,
         )
-        parser.add_argument('infile',
-                            help='path to taskpaper template')
+        parser.add_argument("infile", help="path to taskpaper template")
         args = parser.parse_args()
-        with open(args.infile, encoding='utf-8') as f:
+        with open(args.infile, encoding="utf-8") as f:
             template = f.read()
     return template
 
@@ -958,4 +975,3 @@ def cli():
 
 if __name__ == "__main__":
     sys.exit(cli())
-
