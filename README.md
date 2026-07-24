@@ -7,10 +7,17 @@ into Things by Cultured Code
 
 ### On macOS
 
-Install popthings using pip. Both Python 2 and Python 3 are supported.
+Run popthings directly with [uv](https://docs.astral.sh/uv/), without installing
+it first:
 
 ```bash
-$ pip install popthings
+uvx popthings template.taskpaper
+```
+
+Alternatively, install popthings using pip:
+
+```bash
+pip install popthings
 ```
 
 ### On iOS
@@ -79,7 +86,7 @@ To import the template on the Mac, pass the TaskPaper filename to the
 their value.
 
 ```bash
-$ popthings templatex-travel.taskpaper
+uvx popthings templatex-travel.taskpaper
 Start value? 2018-09-01
 Due value? 2018-09-10
 Destination value? Paris
@@ -114,7 +121,7 @@ are any.
 1. Bump the version in `popthings.py`
 2. Update the changelog, link the versions.
 3. Commit and tag with version number. Push tags. Update the release on GitHub.
-4. Build a source dist with `python3 setup.py clean && rm dist/* && python3 setup.py sdist bdist_wheel`
+4. Build the source and wheel distributions with `uv build`
 5. Test upload to PyPI test with `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`
 6. Create a temporary environment `mktmpenv` and test install with `pip install --index-url https://test.pypi.org/simple/ popthings`
 7. If everything looks good, upload for real with `twine upload dist/*`

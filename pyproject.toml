@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "popthings"
+dynamic = ["version"]
+description = "Import TaskPaper templates with placeholders into Things"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Alexandre Chabot-Leclerc", email = "github@alexchabot.net" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Natural Language :: English",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3",
+]
+
+[project.scripts]
+popthings = "popthings:cli"
+
+[project.urls]
+Homepage = "https://github.com/achabotl/popthings"
+
+[tool.setuptools]
+py-modules = ["popthings"]
+
+[tool.setuptools.dynamic]
+version = { attr = "popthings.__version__" }
