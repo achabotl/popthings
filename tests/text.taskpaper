@@ -1,0 +1,20 @@
+Project name: @start($start) @email
+	$start $due
+	Comment under project
+	More comments under project
+	- Task 0.1 @due($due) @email 
+		Note 0.1
+		Note 0.1 has two lines of comment
+	- Task 0.12 @start($start)
+	Heading 1:
+		Note 1. Where should it go?
+		- Task 1.1
+			Note 1.1
+		- Task 1.2
+	HEading 2:
+		- Task 2.1
+			Note 2.1
+			- Checklist Item 2.1.1
+				Note 2.1.1
+Project 2:
+	- Task under project 2

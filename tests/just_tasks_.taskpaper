@@ -1,0 +1,15 @@
+Project 1:
+	$due $start $location
+	Note under project 1
+	- Task 1 @due($start + 1w)
+		A note under task 1
+	- Task 2 @start($start)
+		- Checklist item under task 2
+			- A checklist under a checklist
+	Heading 1, to $location:
+		- Task under heading 1
+        
+Project 2:
+	- Task under project 2
+	Heading 2, under project 2:
+	- Task under heading 2
