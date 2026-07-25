@@ -118,10 +118,21 @@ are any.
 
 ## Making a Release
 
-1. Bump the version in `popthings.py`
-2. Update the changelog, link the versions.
-3. Commit and tag with version number. Push tags. Update the release on GitHub.
-4. Build the source and wheel distributions with `uv build`
-5. Test upload to PyPI test with `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`
-6. Create a temporary environment `mktmpenv` and test install with `pip install --index-url https://test.pypi.org/simple/ popthings`
-7. If everything looks good, upload for real with `twine upload dist/*`
+1. Bump `__version__` in `popthings.py`.
+2. Move the changelog entries under a new version heading and update the
+   comparison links.
+3. Run the tests and build the distributions:
+
+   ```bash
+   python -m unittest
+   uv build
+   ```
+
+4. Commit the release changes, merge them into `main`, and confirm that the
+   test workflow succeeds.
+5. Tag the release commit as `vX.Y.Z` and push the tag.
+6. Create a [non-draft GitHub Release](https://github.com/achabotl/popthings/releases/new)
+   for that tag.
+7. Confirm that the
+   [publish workflow](.github/workflows/publish.yml) succeeds and that the new
+   version appears on [PyPI](https://pypi.org/project/popthings/).
